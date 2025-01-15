@@ -1,0 +1,64 @@
+import numpy as np
+import pandas as pd
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+# Veri setini yükleme
+data = load_breast_cancer()
+X = data['data']
+y = data['target']
+
+# Veri genişletme fonksiyonları
+#Fonksiyon açıklaması;
+#def jitter(X, noise=0.01): fonksiyonu, veri takviye (data augmentation) kapsamında kullanılan bir tekniktir. Bu fonksiyon, giriş verisine küçük rastgele gürültüler ekleyerek veriyi "jitter" (kaydırma) yapar. Bu, verinin daha çeşitli görünmesini sağlayarak modelin genel performansını artırmaya yardımcı olabilir. Aşağıda fonksiyonun işlevi detaylandırılmıştır:
+#Modelin daha geniş bir veri yelpazesi üzerinde eğitilmesine yardımcı olabilir.    
+def jitter(X, noise=0.01):
+    return X + np.random.normal(0, noise, X.shape)
+
+#Scale(Ölçeklendirme)
+def scale(X, scaler=0.1):
+    return X * np.random.normal(1, scaler, X.shape)
+
+#Flip(Çevirme)
+def flip(X):
+    return np.fliplr(X)
+
+#Rotation(Dödürme)
+def rotate(X):
+    num_cols = X.shape[1]
+    return np.reshape(np.roll(X.flatten(), num_cols), X.shape)
+#Crop(Kırpma)
+def crop(X, crop_val=0.1):
+    return X * (1 - crop_val)
+
+# Veri çoğaltma uygulama
+augmented_data = X.copy()
+for technique in [jitter, scale, flip, rotate, crop]:
+    augmented_data = np.vstack((augmented_data, technique(X)))
+
+# Yeni etiketlerin oluşturulması
+augmented_labels = np.tile(y, 6)  # 5 ekleme ve 1 orijinal veri seti
+
+#Train test split
+X_train, X_test, y_train, y_test = train_test_split(augmented_data, augmented_labels, test_size=0.3, random_state=0)
+
+# KNN modelini oluşturma ve eğitme
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train, y_train)
+
+#Doğruluk oranını hesaplama
+y_pred = knn.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+
+print(f"Doğruluk Oranı: {accuracy * 100:.2f}%")
+
+#Tüm bu aşamaları gerçekleştirdikten sonra doğruluk oranımız %86.93 olarak çıkmaktadır.
+
+
+
+
+
+
+

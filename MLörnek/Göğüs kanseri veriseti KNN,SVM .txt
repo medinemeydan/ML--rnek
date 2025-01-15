@@ -1,0 +1,160 @@
+#sklearn kütüphanesinden veri setimi indiriyorum.
+from sklearn.datasets import load_breast_cancer
+import pandas as pd
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
+import matplotlib.pyplot as plt
+
+#veri setini inceleyelim
+cancer= load_breast_cancer()
+
+df= pd.DataFrame(data= cancer.data, columns= cancer.feature_names)
+
+#Target verimin içerisinde 0 ve 1 var. Bunlar hücrelerin iyi huylumu yoksa kötü huylumu olduğunu gösterecek bize
+df["target"]=cancer.target
+
+#KNN sınıflandırması
+X=cancer.data
+y=cancer.target
+
+#train test split
+X_train, X_test, y_train, y_test=train_test_split(X,y,test_size=0.3, random_state=42)
+
+
+#Modeli oluşturalım
+knn=KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train, y_train)#fit fonksiyonu verimizi kullanarark knn algoritmasını eğitir.
+y_pred= knn.predict(X_test)
+
+
+#Gerçek değerler ile tahmin edilen değerler arasında ki doğruluğa bakalım
+accuracy = accuracy_score(y_test, y_pred)
+print("Doğruluk:", accuracy)
+
+#Buraya kadar olan kodumuzu çalıştırdığımızda Doğruluk oranımız %95 çıktı. Bu iyi bir sonuç.
+
+#_Hiperparametre ayarlaması yaparak vermin doğruluğunu arttırıyorum
+accuracy_values=[]
+k_values=[]
+
+for k in range(1,21):
+    knn=KNeighborsClassifier(n_neighbors=k)
+    knn.fit(X_train, y_train)
+    y_pred= knn.predict(X_test)
+    accuracy =accuracy_score(y_test, y_pred)
+    accuracy_values.append(accuracy)
+    k_values.append(k)
+    
+plt.figure()
+plt.plot(k_values, accuracy_values, marker="o", linestyle="-")
+plt.xlabel("K değeri")
+plt.ylabel("Doğruluk") 
+plt.xticks(k_values)
+plt.grid(True) 
+  
+ #KNN algoritmamızda başarı oranımız %94
+#Sonuç olarak grafiği yorumlarsak, k değeri olarak 10 değerini seçmak en mantıklısı olacaktır.
+ 
+#%%
+
+from sklearn.datasets import load_breast_cancer
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
+import matplotlib.pyplot as plt
+
+#veri setini inceleyelim
+cancer= load_breast_cancer()
+
+df= pd.DataFrame(data= cancer.data, columns= cancer.feature_names)
+
+#Target verimin içerisinde 0 ve 1 var. Bunlar hücrelerin iyi huylumu yoksa kötü huylumu olduğunu gösterecek bize
+df["target"]=cancer.target
+
+#SVM sınıflandırması
+X=cancer.data
+y=cancer.target
+
+#train test split
+X_train, X_test, y_train, y_test=train_test_split(X,y,test_size=0.3, random_state=42)
+
+
+#SVM modelinin oluşturulması ve eğitilmesi
+svm_classifier = SVC(kernel='linear', random_state=42)
+svm_classifier.fit(X_train, y_train)
+
+#SVM modelin tahmini
+y_pred_svm=svm_classifier.predict(X_test)
+
+#SVM doğruluk oranının hesaplanması
+svm_accuracy = accuracy_score(y_test, y_pred_svm)
+print("SVM Doğruluk oranı:", svm_accuracy)
+
+#SVM algoritmasının doğruluk oranı %96 olarak görünmektedir. 
+#♠KNN modelimizde %94 oranı çıkmıştı.
+# SVM algoritması ile daha doğru bir sonuca, orana ulaşmış olduk.
+   
+#%% 
+  
+import numpy as np 
+from sklearn.datasets import load_breast_cancer
+import pandas as pd
+from skimage.feature import hog
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+
+
+#veri setini inceleyelim
+cancer= load_breast_cancer()
+
+df= pd.DataFrame(data= cancer.data, columns= cancer.feature_names)
+
+#Target verimin içerisinde 0 ve 1 var. Bunlar hücrelerin iyi huylumu yoksa kötü huylumu olduğunu gösterecek bize
+df["target"]=cancer.target
+
+#Etiketlerimizi oluşturalım
+X=cancer.data
+y=cancer.target
+
+#HOG özelliklerini kullanıyoruz
+X_hog = []
+for feature in X:
+    hog_feature = hog(feature.reshape((30, 1)),
+                      pixels_per_cell=(1, 1), 
+                      cells_per_block=(1, 1),
+                      visualize=False)
+    X_hog.append(hog_feature)
+X_hog = np.array(X_hog)
+
+#train test split
+X_train, X_test, y_train, y_test=train_test_split(X,y,test_size=0.3, random_state=42)
+
+
+# KNN modelini oluşturma ve eğitme 
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train, y_train)
+
+#Doğruluk oranını hesaplayalım
+y_pred = knn.predict(X_test) 
+accuracy = accuracy_score(y_test, y_pred) 
+
+print(f"Doğruluk Oranı: {accuracy * 100:.2f}%")
+
+#Doğruluk %94 olarak hesaplandı
+#KNN doğruluk oranı %96 olarak hesaplandı.
+
+
+
+    
+
+    
+    

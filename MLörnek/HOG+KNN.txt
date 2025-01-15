@@ -1,0 +1,48 @@
+import numpy as np 
+from sklearn.datasets import load_breast_cancer
+import pandas as pd
+from skimage.feature import hog
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+
+
+#veri setini inceleyelim
+cancer= load_breast_cancer()
+
+df= pd.DataFrame(data= cancer.data, columns= cancer.feature_names)
+
+#Target verimin içerisinde 0 ve 1 var. Bunlar hücrelerin iyi huylumu yoksa kötü huylumu olduğunu gösterecek bize
+df["target"]=cancer.target
+
+#Etiketlerimizi oluşturalım
+X=cancer.data
+y=cancer.target
+
+#HOG özelliklerini kullanıyoruz
+X_hog = []
+for feature in X:
+    hog_feature = hog(feature.reshape((30, 1)),
+                      pixels_per_cell=(1, 1), 
+                      cells_per_block=(1, 1),
+                      visualize=False)
+    X_hog.append(hog_feature)
+X_hog = np.array(X_hog)
+
+#train test split
+X_train, X_test, y_train, y_test=train_test_split(X,y,test_size=0.3, random_state=42)
+
+
+# KNN modelini oluşturma ve eğitme 
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train, y_train)
+
+#Doğruluk oranını hesaplayalım
+y_pred = knn.predict(X_test) 
+accuracy = accuracy_score(y_test, y_pred) 
+
+print(f"Doğruluk Oranı: {accuracy * 100:.2f}%")
+
+#HOG+KNN hesaplamamızda doğruluk oranımız %94 olarak belirlendi
+
